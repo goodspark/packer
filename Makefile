@@ -60,7 +60,7 @@ install-gen-deps: ## Install dependencies for code generation
 
 install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.24.0
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -84,8 +84,7 @@ lint: install-lint-deps ## Lint Go code
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	GO111MODULE=on golangci-lint run --new-from-rev=`git merge-base master HEAD` ./...
-
+	git diff --name-status `git merge-base master HEAD`...HEAD | grep ^A | grep .go | awk '{print $$2}' | GO111MODULE=on xargs -n1 golangci-lint run
 
 fmt: ## Format Go code
 	@go fmt ./...
